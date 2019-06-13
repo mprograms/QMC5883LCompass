@@ -1,0 +1,308 @@
+/*
+===============================================================================================================
+QMC5883LCompass.h
+Library for using QMC5583L series chip boards as a compass.
+Learn more at [https://github.com/mprograms/QMC5883LCompass]
+
+Supports:
+
+- Getting values of XYZ axis.
+- Calculating Azimuth.
+- Getting 16 point Azimuth bearing direction (0 - 15).
+- Getting 16 point Azimuth bearing Names (N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)
+- Smoothing of XYZ readings via rolling averaging and min / max removal.
+- Optional chipset modes (see below)
+
+===============================================================================================================
+
+v1.0 - June 13, 2019
+Written by MRPrograms 
+Github: [https://github.com/mprograms/]
+
+Release under the GNU General Public License v3
+[https://www.gnu.org/licenses/gpl-3.0.en.html]
+
+===============================================================================================================
+
+
+
+FROM QST QMC5883L Datasheet [https://nettigo.pl/attachments/440]
+-----------------------------------------------
+ MODE CONTROL (MODE)
+	Standby			0x00
+	Continuous		0x01
+
+OUTPUT DATA RATE (ODR)
+	10Hz        	0x00
+	50Hz        	0x04
+	100Hz       	0x08
+	200Hz       	0x0C
+
+FULL SCALE (RNG)
+	2G          	0x00
+	8G          	0x10
+
+OVER SAMPLE RATIO (OSR)
+	512         	0x00
+	256         	0x40
+	128         	0x80
+	64          	0xC0 
+  
+*/
+
+
+
+#include "Arduino.h"
+#include "QMC5883LCompass.h"
+#include <Wire.h>
+
+QMC5883LCompass::QMC5883LCompass() {
+}
+
+
+/**
+	INIT
+	Initialize Chip - This needs to be called in the sketch setup() function.
+	
+	@since v0.1;
+**/
+void QMC5883LCompass::init(){
+	writeReg(0x0B,0x01);
+	setMode(0x01,0x0C,0x10,0X00);
+}
+
+
+/**
+	SET ADDRESS
+	Set the I2C Address of the chip. This needs to be called in the sketch setup() function.
+	
+	@since v0.1;
+**/
+// Set I2C Address if different then default.
+void QMC5883LCompass::setADDR(byte b){
+	_ADDR = b;
+}
+
+
+
+
+/**
+	REGISTER
+	Write the register to the chip.
+	
+	@since v0.1;
+**/
+// Write register values to chip
+void QMC5883LCompass::writeReg(byte r, byte v){
+	Wire.beginTransmission(_ADDR);
+	Wire.write(r);
+	Wire.write(v);
+	Wire.endTransmission();
+}
+
+
+/**
+	CHIP MODE
+	Set the chip mode.
+	
+	@since v0.1;
+**/
+// Set chip mode
+void QMC5883LCompass::setMode(byte mode, byte odr, byte rng, byte osr){
+	writeReg(0x09,mode|odr|rng|osr);
+}
+
+
+/**
+	RESET
+	Reset the chip.
+	
+	@since v0.1;
+**/
+// Reset the chip
+void QMC5883LCompass::setReset(){
+	writeReg(0x0A,0x80);
+}
+
+// 1 = Basic 2 = Advanced
+void QMC5883LCompass::setSmoothing(byte steps, bool adv){
+	_smoothUse = true;
+	_smoothSteps = ( steps > 10) ? 10 : steps;
+	_smoothAdvanced = (adv == true) ? true : false;
+}
+
+
+/**
+	READ
+	Read the XYZ axis and save the values in an array.
+	
+	@since v0.1;
+**/
+void QMC5883LCompass::read(){
+	Wire.beginTransmission(_ADDR);
+	Wire.write(0x00);
+	int err = Wire.endTransmission();
+	if (!err) {
+		Wire.requestFrom(_ADDR, (byte)7);
+		_vRaw[0] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
+		_vRaw[1] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
+		_vRaw[2] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
+		
+		if ( _smoothUse ) {
+			smoothing();
+		}
+		
+		byte overflow = Wire.read() & 0x02;
+		//return overflow << 2;
+	}
+}
+
+
+/**
+	SMOOTH OUTPUT
+	This function smooths the output for the XYZ axis. Depending on the options set in
+	@see setSmoothing(), we can run multiple methods of smoothing the sensor readings.
+	
+	First we store (n) samples of sensor readings for each axis and store them in a rolling array.
+	As each new sensor reading comes in we replace it with a new reading. Then we average the total
+	of all (n) readings.
+	
+	Advanced Smoothing
+	If you turn advanced smoothing on, we will select the min and max values from our array
+	of (n) samples. We then subtract both the min and max from the total and average the total of all
+	(n - 2) readings.
+	
+	NOTE: This function does several calculations and can cause your sketch to run slower.
+	
+	@since v0.3;
+**/
+void QMC5883LCompass::smoothing(){
+	byte max = 0;
+	byte min = 0;
+	
+	if ( _vScan > _smoothSteps - 1 ) { _vScan = 0; }
+	
+	for ( int i = 0; i < 3; i++ ) {
+		if ( _vTotals[i] != 0 ) {
+			_vTotals[i] = _vTotals[i] - _vHistory[_vScan][i];
+		}
+		_vHistory[_vScan][i] = _vRaw[i];
+		_vTotals[i] = _vTotals[i] + _vHistory[_vScan][i];
+		
+		if ( _smoothAdvanced ) {
+			max = 0;
+			for (int j = 0; j < _smoothSteps - 1; j++) {
+				max = ( _vHistory[j][i] > _vHistory[max][i] ) ? j : max;
+			}
+			
+			min = 0;
+			for (int k = 0; k < _smoothSteps - 1; k++) {
+				min = ( _vHistory[k][i] < _vHistory[min][i] ) ? k : min;
+			}
+					
+			_vSmooth[i] = ( _vTotals[i] - (_vHistory[max][i] + _vHistory[min][i]) ) / (_smoothSteps - 2);
+		} else {
+			_vSmooth[i] = _vTotals[i]  / _smoothSteps;
+		}
+	}
+	
+	_vScan++;
+}
+
+
+/**
+	GET X AXIS
+	Read the X axis
+	
+	@since v0.1;
+	@return int x axis
+**/
+int QMC5883LCompass::getX(){
+	return ( _smoothUse ) ? _vSmooth[0] : _vRaw[0];
+}
+
+
+/**
+	GET Y AXIS
+	Read the Y axis
+	
+	@since v0.1;
+	@return int y axis
+**/
+int QMC5883LCompass::getY(){
+	return ( _smoothUse ) ? _vSmooth[1] : _vRaw[1];
+}
+
+
+/**
+	GET Z AXIS
+	Read the Z axis
+	
+	@since v0.1;
+	@return int z axis
+**/
+int QMC5883LCompass::getZ(){
+	return ( _smoothUse ) ? _vSmooth[2] : _vRaw[2];
+}
+
+
+/**
+	GET AZIMUTH
+	Calculate the azimuth (in degrees);
+	
+	@since v0.1;
+	@return int azimuth
+**/
+int QMC5883LCompass::getAzimuth(){
+	int a = atan2( getY(), getX() ) * 180.0 / PI;
+	return a < 0 ? 360 + a : a;
+}
+
+
+/**
+	GET BEARING
+	Divide the 360 degree circle into 16 equal parts and then return the a value of 0-15
+	based on where the azimuth is currently pointing.
+	
+	@since v0.2
+	
+	@return byte direction of bearing
+*/
+byte QMC5883LCompass::getBearing(){
+	unsigned long a = getAzimuth() / 22.5;
+	unsigned long r = a - (int)a;
+	byte sexdec = 0;	
+	sexdec = ( r >= .5 ) ? ceil(a) : floor(a);
+	return sexdec;
+}
+
+
+/**
+	This will take the location of the azimuth as calculated in getBearing() and then
+	produce an array of chars as a text representation of the direction.
+	
+	NOTE: This function does not return anything since it is not possible to return an array.
+	Values must be passed by reference back to your sketch.
+	
+	Example:
+	
+	( if direction is in 1 / NNE)
+	
+	char myArray[3];
+	compass.getBearing(myArray);
+	
+	Serial.print(myArray[0]); // N
+	Serial.print(myArray[1]); // N
+	Serial.print(myArray[2]); // E
+	
+	
+	@see getBearing();
+	
+	@since v0.2
+*/
+void QMC5883LCompass::getDirection(char* myArray){
+	int d = getBearing();
+	myArray[0] = _bearings[d][0];
+	myArray[1] = _bearings[d][1];
+	myArray[2] = _bearings[d][2];
+}
