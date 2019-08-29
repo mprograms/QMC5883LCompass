@@ -1,6 +1,6 @@
 # QMC5883L Compass Arduino Library
 
-by [MRPrograms](https://github.com/mprograms/QMC5883LCompass/)
+by [MPrograms](https://github.com/mprograms/QMC5883LCompass/)
 | 
 [Github Project Page](https://github.com/mprograms/QMC5883LCompass/)
 
@@ -68,9 +68,9 @@ To get the X, Y, or Z sensor readings, simply call the desired function.
 
 ```
 void loop(){
-   int x = getX();
-   int y = getY();
-   int z = getZ();
+   int x = compass.getX();
+   int y = compass.getY();
+   int z = compass.getZ();
 }
 ```
 
@@ -79,35 +79,40 @@ To get the calculated azimuth (compass degree) value, simply call `getAzimuth();
 
 ```
 void loop(){
-   int a = getAzimuth();
+   int a = compass.getAzimuth(azimuth);
 }
 ```
 
 #### Getting Direction / Bearings
 QMC5883L Compass Library calculates the direction range and direction in which the sensor is pointing. There are two functions you can call.
 
-To get a 16 point value of the direction the sensor is facing you can call `getBearing()`. This will divide the 360 range of the compass into 16 parts and return a value of 0-15 in clockwise order. In this case 0 = N, 4 = E, 8 = S, 12 = W. This function is helpful if you wish to roll your own direction output function without the need for calculations.
+To get a 16 point value of the direction the sensor is facing you can call `getBearing(azimuth)`. This will divide the 360 range of the compass into 16 parts and return a value of 0-15 in clockwise order. In this case 0 = N, 4 = E, 8 = S, 12 = W. This function is helpful if you wish to roll your own direction output function without the need for calculations.
 
 ```
 void loop(){
-   byte b = getBearing();
+   azimuth = compass.getAzimuth();
+   byte b = compass.getBearing(azimuth);
 }
 ```
 
-To get a 16 point text representation of the direction the sensor is facing you can call `getDirection();`. This will produce a char array[3] with letters representing each direction. Because we can't return an array we need to pass the values by reference.
+To get a 16 point text representation of the direction the sensor is facing you can call `getDirection(azimuth);`. This will produce a char array[3] with letters representing each direction. Because we can't return an array we need to pass the values by reference.
 
 ```
 void loop(){
+   azimuth = compass.getAzimuth();
    char myArray[3];
-   getDirection(myArray)
+   getDirection(myArray, azimuth);
 }
 ```
 If you want to print these values you can do so like this:
 
 ```
 void loop(){
+   azimuth = compass.getAzimuth();
    char myArray[3];
-   getDirection(myArray)
+   
+   getDirection(myArray, azimuth);
+   
    Serial.print(myArray[0]);
    Serial.print(myArray[1]);
    Serial.print(myArray[2]);
@@ -144,9 +149,9 @@ void loop() {
 	
 	a = compass.getAzimuth();
 	
-	b = compass.getBearing();
+	b = compass.getBearing(a);
 
-	compass.getDirection(myArray);
+	compass.getDirection(myArray, a);
   
   
 	Serial.print("X: ");
@@ -189,7 +194,7 @@ X: 1005 Y: -147 Z: 1281 Azimuth: 352 Bearing: 15 Direction: NNW
 
 
 ### Changing Chip Settings
-The QMC5583L chip provides several different settings you can select. You can change a setting like so:
+The QMC5583L chip provides several different settings you can select.
 
 
 #### Change I2C Address
@@ -208,25 +213,29 @@ You can also change the mode, sensitivity, sample rate and output rate of the QM
 The values to set each mode are in the table below and were taken from the [QST QMC5583L datasheet](https://nettigo.pl/attachments/440).
 
 
-MODE CONTROL (MODE)
-Standby		| 0x00
-Continuous	| 0x01
+| MODE CONTROL (MODE)     | Value |
+| ----------------------- | ----- |
+| Standby		          | 0x00  |
+| Continuous	          | 0x01  |
 
-OUTPUT DATA RATE (ODR)
-10Hz		| 0x00
-50Hz		| 0x04
-100Hz		| 0x08
-200Hz		| 0x0C
+| OUTPUT DATA RATE (ODR)  | Value |
+| ----------------------- | ----- |
+| 10Hz		              | 0x00  |
+| 50Hz		              | 0x04  |
+| 100Hz		              | 0x08  |
+| 200Hz		              | 0x0C  |
 
-FULL SCALE (RNG)
-2G			| 0x00
-8G			| 0x10
+| FULL SCALE (RNG)        | Value |
+| ----------------------- | ----- |
+| 2G			          | 0x00  |
+| 8G			          | 0x10  |
 
-OVER SAMPLE RATIO (OSR)
-64			| 0xC0 
-128			| 0x80
-256			| 0x40
-512			| 0x00
+| OVER SAMPLE RATIO (OSR) | Value |
+| ----------------------- | ----- |
+| 64			          | 0xC0  |
+| 128			          | 0x80  |
+| 256			          | 0x40  |
+| 512			          | 0x00  |
 
 ---
 ## Smoothing Sensor Output

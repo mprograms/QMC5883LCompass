@@ -19,11 +19,11 @@ class QMC5883LCompass{
 	int getY();
 	int getZ();
 	int getAzimuth();
-	byte getBearing();
-	void getDirection(char* myArray);
+	byte getBearing(int azimuth);
+	void getDirection(char* myArray, int azimuth);
 	
   private:
-    void writeReg(byte reg,byte val);
+    void _writeReg(byte reg,byte val);
 	bool _smoothUse = false;
 	byte _smoothSteps = 5;
 	bool _smoothAdvanced = false;
@@ -33,7 +33,7 @@ class QMC5883LCompass{
 	int _vScan = 0;
 	long _vTotals[3] = {0,0,0};
 	int _vSmooth[3] = {0,0,0};
-	void smoothing();
+	void _smoothing();
 	const char _bearings[16][3] =  {
 		{' ', ' ', 'N'},
 		{'N', 'N', 'E'},

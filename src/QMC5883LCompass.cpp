@@ -67,7 +67,8 @@ QMC5883LCompass::QMC5883LCompass() {
 	@since v0.1;
 **/
 void QMC5883LCompass::init(){
-	writeReg(0x0B,0x01);
+	Wire.begin();
+	_writeReg(0x0B,0x01);
 	setMode(0x01,0x0C,0x10,0X00);
 }
 
@@ -93,7 +94,7 @@ void QMC5883LCompass::setADDR(byte b){
 	@since v0.1;
 **/
 // Write register values to chip
-void QMC5883LCompass::writeReg(byte r, byte v){
+void QMC5883LCompass::_writeReg(byte r, byte v){
 	Wire.beginTransmission(_ADDR);
 	Wire.write(r);
 	Wire.write(v);
@@ -109,7 +110,7 @@ void QMC5883LCompass::writeReg(byte r, byte v){
 **/
 // Set chip mode
 void QMC5883LCompass::setMode(byte mode, byte odr, byte rng, byte osr){
-	writeReg(0x09,mode|odr|rng|osr);
+	_writeReg(0x09,mode|odr|rng|osr);
 }
 
 
@@ -121,7 +122,7 @@ void QMC5883LCompass::setMode(byte mode, byte odr, byte rng, byte osr){
 **/
 // Reset the chip
 void QMC5883LCompass::setReset(){
-	writeReg(0x0A,0x80);
+	_writeReg(0x0A,0x80);
 }
 
 // 1 = Basic 2 = Advanced
@@ -149,7 +150,7 @@ void QMC5883LCompass::read(){
 		_vRaw[2] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
 		
 		if ( _smoothUse ) {
-			smoothing();
+			_smoothing();
 		}
 		
 		byte overflow = Wire.read() & 0x02;
@@ -176,7 +177,7 @@ void QMC5883LCompass::read(){
 	
 	@since v0.3;
 **/
-void QMC5883LCompass::smoothing(){
+void QMC5883LCompass::_smoothing(){
 	byte max = 0;
 	byte min = 0;
 	
@@ -264,12 +265,13 @@ int QMC5883LCompass::getAzimuth(){
 	Divide the 360 degree circle into 16 equal parts and then return the a value of 0-15
 	based on where the azimuth is currently pointing.
 	
-	@since v0.2
+	@since v1.0.1 - function now requires azimuth parameter.
+	@since v0.2.0 - initial creation
 	
 	@return byte direction of bearing
 */
-byte QMC5883LCompass::getBearing(){
-	unsigned long a = getAzimuth() / 22.5;
+byte QMC5883LCompass::getBearing(int azimuth){
+	unsigned long a = azimuth / 22.5;
 	unsigned long r = a - (int)a;
 	byte sexdec = 0;	
 	sexdec = ( r >= .5 ) ? ceil(a) : floor(a);
@@ -289,7 +291,7 @@ byte QMC5883LCompass::getBearing(){
 	( if direction is in 1 / NNE)
 	
 	char myArray[3];
-	compass.getBearing(myArray);
+	compass.getDirection(myArray, azimuth);
 	
 	Serial.print(myArray[0]); // N
 	Serial.print(myArray[1]); // N
@@ -298,10 +300,11 @@ byte QMC5883LCompass::getBearing(){
 	
 	@see getBearing();
 	
-	@since v0.2
+	@since v1.0.1 - function now requires azimuth parameter.
+	@since v0.2.0 - initial creation
 */
-void QMC5883LCompass::getDirection(char* myArray){
-	int d = getBearing();
+void QMC5883LCompass::getDirection(char* myArray, int azimuth){
+	int d = getBearing(azimuth);
 	myArray[0] = _bearings[d][0];
 	myArray[1] = _bearings[d][1];
 	myArray[2] = _bearings[d][2];

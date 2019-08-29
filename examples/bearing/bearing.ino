@@ -23,8 +23,9 @@ void setup() {
 void loop() {
   compass.read();
 
+  byte a = compass.getAzimuth();
   // Output here will be a value from 0 - 15 based on the direction of the bearing / azimuth.
-  byte b = compass.getBearing();
+  byte b = compass.getBearing(a);
   
   Serial.print("B: ");
   Serial.print(b);

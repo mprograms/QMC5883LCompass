@@ -21,9 +21,11 @@ void setup() {
 
 void loop() {
   compass.read();
+  
+  byte a = compass.getAzimuth();
 
   char myArray[3];
-  compass.getDirection(myArray);
+  compass.getDirection(myArray, a);
   
   Serial.print(myArray[0]);
   Serial.print(myArray[1]);
