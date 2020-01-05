@@ -208,7 +208,7 @@ void setup(){
 ```
 #### Change Mode, Data Rate, Scale, Sample Ratio
 
-You can also change the mode, sensitivity, sample rate and output rate of the QMC5583L chip. To do this, simply call `compass.setMode(MODE, ODR, RNG, OSR)l` after you have called `compass.init()`. Note that each value must be a byte.
+You can also change the mode, sensitivity, sample rate and output rate of the QMC5583L chip. To do this, simply call `compass.setMode(MODE, ODR, RNG, OSR);` after you have called `compass.init()`. Note that each value must be a byte.
 
 The values to set each mode are in the table below and were taken from the [QST QMC5583L datasheet](https://nettigo.pl/attachments/440).
 
@@ -255,7 +255,7 @@ To enable smoothing call `compass.setSmoothing(STEPS, ADVANCED);` before the loo
 ```
 void setup(){
   compass.init();
-  setSmoothing(10, true);
+  compass.setSmoothing(10, true);
 }
 ```
 
