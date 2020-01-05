@@ -172,7 +172,8 @@ void QMC5883LCompass::read(){
 			_smoothing();
 		}
 		
-		byte overflow = Wire.read() & 0x02;
+		Wire.read() & 0x02;
+		//byte overflow = Wire.read() & 0x02;
 		//return overflow << 2;
 	}
 }
@@ -200,9 +201,9 @@ void QMC5883LCompass::_applyCalibration(){
 	float y_scale = (float)avg_delta / y_avg_delta;
 	float z_scale = (float)avg_delta / z_avg_delta;
 
-	_vCalibrated[0] = (x - x_offset) * x_scale;
-	_vCalibrated[1] = (y - y_offset) * y_scale;
-	_vCalibrated[2] = (z - y_offset) * z_scale;
+	_vCalibrated[0] = (_vRaw[0] - x_offset) * x_scale;
+	_vCalibrated[1] = (_vRaw[1] - y_offset) * y_scale;
+	_vCalibrated[2] = (_vRaw[2] - y_offset) * z_scale;
 }
 
 
