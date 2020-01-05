@@ -203,7 +203,7 @@ void QMC5883LCompass::_applyCalibration(){
 
 	_vCalibrated[0] = (_vRaw[0] - x_offset) * x_scale;
 	_vCalibrated[1] = (_vRaw[1] - y_offset) * y_scale;
-	_vCalibrated[2] = (_vRaw[2] - y_offset) * z_scale;
+	_vCalibrated[2] = (_vRaw[2] - z_offset) * z_scale;
 }
 
 
@@ -296,7 +296,7 @@ int QMC5883LCompass::getZ(){
 
 int QMC5883LCompass::_get(int index){
 	if ( _smoothUse ) 
-		return _vSmooth[index]
+		return _vSmooth[index];
 	
 	if ( _calibrationUse )
 		return _vCalibrated[index];
