@@ -159,7 +159,7 @@ void QMC5883LCompass::read(){
 	Wire.write(0x00);
 	int err = Wire.endTransmission();
 	if (!err) {
-		Wire.requestFrom(_ADDR, (byte)7);
+		Wire.requestFrom(_ADDR, (byte)6);
 		_vRaw[0] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
 		_vRaw[1] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
 		_vRaw[2] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
@@ -172,7 +172,6 @@ void QMC5883LCompass::read(){
 			_smoothing();
 		}
 		
-		Wire.read() & 0x02;
 		//byte overflow = Wire.read() & 0x02;
 		//return overflow << 2;
 	}
