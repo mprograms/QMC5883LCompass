@@ -1,7 +1,7 @@
 /*
 ===============================================================================================================
 QMC5883LCompass.h Library XYZ Example Sketch
-Learn more at [https://github.com/mprograms/QMC5883Compas]
+Learn more at [https://github.com/mprograms/QMC5883LCompass]
 
 This example shows how to get the XYZ values from the sensor.
 

@@ -238,6 +238,11 @@ The values to set each mode are in the table below and were taken from the [QST 
 | 512			          | 0x00  |
 
 ---
+
+## Calibrating The Sensor
+
+It is possible to set calibration values specific for your QMC5883L to improve the quality of the readings. Just call `compass.setCalibration(X_MIN, X_MAX, Y_MIN, Y_MAX, Z_MIN, Z_MAX);` once. To find the values specific for your sensor flash the calibration example and watch the output on the serial monitor.
+
 ## Smoothing Sensor Output
 
 Smoothing can help in cases where sensor readings seem to bounce around. QMC5883L Compass Library uses a rolling average function to store (n) sensor readings and return the average of each axis. This averaging also places smoothing on azimuth and directional output as well.
