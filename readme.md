@@ -79,7 +79,7 @@ To get the calculated azimuth (compass degree) value, simply call `getAzimuth();
 
 ```
 void loop(){
-   int a = compass.getAzimuth(azimuth);
+   int a = compass.getAzimuth();
 }
 ```
 
