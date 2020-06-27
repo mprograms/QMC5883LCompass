@@ -208,7 +208,7 @@ void setup(){
 ```
 #### Change Mode, Data Rate, Scale, Sample Ratio
 
-You can also change the mode, sensitivity, sample rate and output rate of the QMC5583L chip. To do this, simply call `compass.setMode(MODE, ODR, RNG, OSR)l` after you have called `compass.init()`. Note that each value must be a byte.
+You can also change the mode, sensitivity, sample rate and output rate of the QMC5583L chip. To do this, simply call `compass.setMode(MODE, ODR, RNG, OSR);` after you have called `compass.init()`. Note that each value must be a byte.
 
 The values to set each mode are in the table below and were taken from the [QST QMC5583L datasheet](https://nettigo.pl/attachments/440).
 
@@ -238,6 +238,11 @@ The values to set each mode are in the table below and were taken from the [QST 
 | 512			          | 0x00  |
 
 ---
+
+## Calibrating The Sensor
+
+It is possible to set calibration values specific for your QMC5883L to improve the quality of the readings. Just call `compass.setCalibration(X_MIN, X_MAX, Y_MIN, Y_MAX, Z_MIN, Z_MAX);` once. To find the values specific for your sensor flash the calibration example and watch the output on the serial monitor.
+
 ## Smoothing Sensor Output
 
 Smoothing can help in cases where sensor readings seem to bounce around. QMC5883L Compass Library uses a rolling average function to store (n) sensor readings and return the average of each axis. This averaging also places smoothing on azimuth and directional output as well.
@@ -255,7 +260,7 @@ To enable smoothing call `compass.setSmoothing(STEPS, ADVANCED);` before the loo
 ```
 void setup(){
   compass.init();
-  setSmoothing(10, true);
+  compass.setSmoothing(10, true);
 }
 ```
 
