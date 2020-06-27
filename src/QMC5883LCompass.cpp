@@ -132,6 +132,26 @@ void QMC5883LCompass::setSmoothing(byte steps, bool adv){
 	_smoothAdvanced = (adv == true) ? true : false;
 }
 
+/**
+    SET CALIBRATION
+	Set calibration values for more accurate readings
+		
+	@author Claus Näveke - TheNitek [https://github.com/TheNitek]
+	
+	@since v1.1.0
+**/
+void QMC5883LCompass::setCalibration(int x_min, int x_max, int y_min, int y_max, int z_min, int z_max){
+	_calibrationUse = true;
+
+	_vCalibration[0][0] = x_min;
+	_vCalibration[0][1] = x_max;
+	_vCalibration[1][0] = y_min;
+	_vCalibration[1][1] = y_max;
+	_vCalibration[2][0] = z_min;
+	_vCalibration[2][1] = z_max;
+}
+
+
 
 /**
 	READ
@@ -144,18 +164,54 @@ void QMC5883LCompass::read(){
 	Wire.write(0x00);
 	int err = Wire.endTransmission();
 	if (!err) {
-		Wire.requestFrom(_ADDR, (byte)7);
+		Wire.requestFrom(_ADDR, (byte)6);
 		_vRaw[0] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
 		_vRaw[1] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
 		_vRaw[2] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
+
+		if ( _calibrationUse ) {
+			_applyCalibration();
+		}
 		
 		if ( _smoothUse ) {
 			_smoothing();
 		}
 		
-		byte overflow = Wire.read() & 0x02;
+		//byte overflow = Wire.read() & 0x02;
 		//return overflow << 2;
 	}
+}
+
+/**
+    APPLY CALIBRATION
+	This function uses the calibration data provided via @see setCalibration() to calculate more
+	accurate readings
+	
+	@author Claus Näveke - TheNitek [https://github.com/TheNitek]
+	
+	Based on this awesome article:
+	https://appelsiini.net/2018/calibrate-magnetometer/
+	
+	@since v1.1.0
+	
+**/
+void QMC5883LCompass::_applyCalibration(){
+	int x_offset = (_vCalibration[0][0] + _vCalibration[0][1])/2;
+	int y_offset = (_vCalibration[1][0] + _vCalibration[1][1])/2;
+	int z_offset = (_vCalibration[2][0] + _vCalibration[2][1])/2;
+	int x_avg_delta = (_vCalibration[0][1] - _vCalibration[0][0])/2;
+	int y_avg_delta = (_vCalibration[1][1] - _vCalibration[1][0])/2;
+	int z_avg_delta = (_vCalibration[2][1] - _vCalibration[2][0])/2;
+
+	int avg_delta = (x_avg_delta + y_avg_delta + z_avg_delta) / 3;
+
+	float x_scale = (float)avg_delta / x_avg_delta;
+	float y_scale = (float)avg_delta / y_avg_delta;
+	float z_scale = (float)avg_delta / z_avg_delta;
+
+	_vCalibrated[0] = (_vRaw[0] - x_offset) * x_scale;
+	_vCalibrated[1] = (_vRaw[1] - y_offset) * y_scale;
+	_vCalibrated[2] = (_vRaw[2] - z_offset) * z_scale;
 }
 
 
@@ -187,7 +243,7 @@ void QMC5883LCompass::_smoothing(){
 		if ( _vTotals[i] != 0 ) {
 			_vTotals[i] = _vTotals[i] - _vHistory[_vScan][i];
 		}
-		_vHistory[_vScan][i] = _vRaw[i];
+		_vHistory[_vScan][i] = ( _calibrationUse ) ? _vCalibrated[i] : _vRaw[i];
 		_vTotals[i] = _vTotals[i] + _vHistory[_vScan][i];
 		
 		if ( _smoothAdvanced ) {
@@ -219,7 +275,7 @@ void QMC5883LCompass::_smoothing(){
 	@return int x axis
 **/
 int QMC5883LCompass::getX(){
-	return ( _smoothUse ) ? _vSmooth[0] : _vRaw[0];
+	return _get(0);
 }
 
 
@@ -231,7 +287,7 @@ int QMC5883LCompass::getX(){
 	@return int y axis
 **/
 int QMC5883LCompass::getY(){
-	return ( _smoothUse ) ? _vSmooth[1] : _vRaw[1];
+	return _get(1);
 }
 
 
@@ -243,8 +299,26 @@ int QMC5883LCompass::getY(){
 	@return int z axis
 **/
 int QMC5883LCompass::getZ(){
-	return ( _smoothUse ) ? _vSmooth[2] : _vRaw[2];
+	return _get(2);
 }
+
+/**
+	GET SENSOR AXIS READING
+	Get the smoothed, calibration, or raw data from a given sensor axis
+	
+	@since v1.1.0
+	@return int sensor axis value
+**/
+int QMC5883LCompass::_get(int i){
+	if ( _smoothUse ) 
+		return _vSmooth[i];
+	
+	if ( _calibrationUse )
+		return _vCalibrated[i];
+
+	return _vRaw[i];
+}
+
 
 
 /**

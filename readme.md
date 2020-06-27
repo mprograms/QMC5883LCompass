@@ -208,7 +208,7 @@ void setup(){
 ```
 #### Change Mode, Data Rate, Scale, Sample Ratio
 
-You can also change the mode, sensitivity, sample rate and output rate of the QMC5583L chip. To do this, simply call `compass.setMode(MODE, ODR, RNG, OSR)l` after you have called `compass.init()`. Note that each value must be a byte.
+You can also change the mode, sensitivity, sample rate and output rate of the QMC5583L chip. To do this, simply call `compass.setMode(MODE, ODR, RNG, OSR);` after you have called `compass.init()`. Note that each value must be a byte.
 
 The values to set each mode are in the table below and were taken from the [QST QMC5583L datasheet](https://nettigo.pl/attachments/440).
 
@@ -238,6 +238,7 @@ The values to set each mode are in the table below and were taken from the [QST 
 | 512			          | 0x00  |
 
 ---
+
 ## Smoothing Sensor Output
 
 Smoothing can help in cases where sensor readings seem to bounce around. QMC5883L Compass Library uses a rolling average function to store (n) sensor readings and return the average of each axis. This averaging also places smoothing on azimuth and directional output as well.
@@ -255,8 +256,33 @@ To enable smoothing call `compass.setSmoothing(STEPS, ADVANCED);` before the loo
 ```
 void setup(){
   compass.init();
-  setSmoothing(10, true);
+  compass.setSmoothing(10, true);
 }
 ```
 
 
+## Calibrating The Sensor
+
+QMC5883LCompass library includes a calibration function and utility sketch to help you calibrate your QMC5883L chip. Calibration is a two-step process.
+
+### Step 1: Run Calibration Sketch
+
+1. Ensure that your QMC5883L chip is connected.
+2. Locate the included calibration sketch under EXAMPLES > QMC5883LCOMPASS > CALIBRATION.
+3. Upload the calibration sketch to your arduino and then open the serial monitor.
+4. Follow the directions on the screen by moving your sensor around when the calibration process starts.
+5. Once all calibration data has been collected, the sketch will tell provide you with some code that will look like `compass.setCalibration(-1537, 1266, -1961, 958, -1342, 1492);` Copy this code. You may want to save it for future reference.
+
+### Step 2: Using Calibration Data
+
+1. Open your project's sketch and paste the line of code you copied directly below the `compass.init()` call.
+2. Use the QMC5883LCompass library as normal.
+
+It is recommended that you use the provided calibration sketch to generate your sensor's min and max values but you can also add your own by using the `compass.setCalibration(X_MIN, X_MAX, Y_MIN, Y_MAX, Z_MIN, Z_MAX);` function.
+
+
+## Contributions
+
+Special thanks is given to the following individuals who have contributed to this library:
+
+	- Claus Näveke : [TheNitek](https://github.com/TheNitek) for adding calibration functions to the library.
