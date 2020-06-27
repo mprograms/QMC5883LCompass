@@ -135,6 +135,10 @@ void QMC5883LCompass::setSmoothing(byte steps, bool adv){
 /**
     SET CALIBRATION
 	Set calibration values for more accurate readings
+		
+	@author Claus Näveke - TheNitek [https://github.com/TheNitek]
+	
+	@since v1.1.0
 **/
 void QMC5883LCompass::setCalibration(int x_min, int x_max, int y_min, int y_max, int z_min, int z_max){
 	_calibrationUse = true;
@@ -146,6 +150,7 @@ void QMC5883LCompass::setCalibration(int x_min, int x_max, int y_min, int y_max,
 	_vCalibration[2][0] = z_min;
 	_vCalibration[2][1] = z_max;
 }
+
 
 
 /**
@@ -182,9 +187,13 @@ void QMC5883LCompass::read(){
 	This function uses the calibration data provided via @see setCalibration() to calculate more
 	accurate readings
 	
-
+	@author Claus Näveke - TheNitek [https://github.com/TheNitek]
+	
 	Based on this awesome article:
 	https://appelsiini.net/2018/calibrate-magnetometer/
+	
+	@since v1.1.0
+	
 **/
 void QMC5883LCompass::_applyCalibration(){
 	int x_offset = (_vCalibration[0][0] + _vCalibration[0][1])/2;
@@ -293,14 +302,21 @@ int QMC5883LCompass::getZ(){
 	return _get(2);
 }
 
-int QMC5883LCompass::_get(int index){
+/**
+	GET SENSOR AXIS READING
+	Get the smoothed, calibration, or raw data from a given sensor axis
+	
+	@since v1.1.0
+	@return int sensor axis value
+**/
+int QMC5883LCompass::_get(int i){
 	if ( _smoothUse ) 
-		return _vSmooth[index];
+		return _vSmooth[i];
 	
 	if ( _calibrationUse )
-		return _vCalibrated[index];
+		return _vCalibrated[i];
 
-	return _vRaw[index];
+	return _vRaw[i];
 }
 
 

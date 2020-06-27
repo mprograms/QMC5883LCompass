@@ -239,10 +239,6 @@ The values to set each mode are in the table below and were taken from the [QST 
 
 ---
 
-## Calibrating The Sensor
-
-It is possible to set calibration values specific for your QMC5883L to improve the quality of the readings. Just call `compass.setCalibration(X_MIN, X_MAX, Y_MIN, Y_MAX, Z_MIN, Z_MAX);` once. To find the values specific for your sensor flash the calibration example and watch the output on the serial monitor.
-
 ## Smoothing Sensor Output
 
 Smoothing can help in cases where sensor readings seem to bounce around. QMC5883L Compass Library uses a rolling average function to store (n) sensor readings and return the average of each axis. This averaging also places smoothing on azimuth and directional output as well.
@@ -265,3 +261,28 @@ void setup(){
 ```
 
 
+## Calibrating The Sensor
+
+QMC5883LCompass library includes a calibration function and utility sketch to help you calibrate your QMC5883L chip. Calibration is a two-step process.
+
+### Step 1: Run Calibration Sketch
+
+1. Ensure that your QMC5883L chip is connected.
+2. Locate the included calibration sketch under EXAMPLES > QMC5883LCOMPASS > CALIBRATION.
+3. Upload the calibration sketch to your arduino and then open the serial monitor.
+4. Follow the directions on the screen by moving your sensor around when the calibration process starts.
+5. Once all calibration data has been collected, the sketch will tell provide you with some code that will look like `compass.setCalibration(-1537, 1266, -1961, 958, -1342, 1492);` Copy this code. You may want to save it for future reference.
+
+### Step 2: Using Calibration Data
+
+1. Open your project's sketch and paste the line of code you copied directly below the `compass.init()` call.
+2. Use the QMC5883LCompass library as normal.
+
+It is recommended that you use the provided calibration sketch to generate your sensor's min and max values but you can also add your own by using the `compass.setCalibration(X_MIN, X_MAX, Y_MIN, Y_MAX, Z_MIN, Z_MAX);` function.
+
+
+## Contributions
+
+Special thanks is given to the following individuals who have contributed to this library:
+
+	- Claus Näveke : [TheNitek](https://github.com/TheNitek) for adding calibration functions to the library.

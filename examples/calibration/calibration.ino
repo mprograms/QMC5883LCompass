@@ -1,14 +1,40 @@
 /*
-===============================================================================================================
-QMC5883LCompass.h Library XYZ Example Sketch
+QMC5883LCompass.h Library Calibration Example Sketch
 Learn more at [https://github.com/mprograms/QMC5883LCompass]
 
-Generate calibration values for your QMC5883L
+Upload this calibration sketch onto your Arduino to provide calibration for your QMC5883L chip.
+After upload, run the serial monitor and follow the directions.
+When prompted, copy the last line into your project's actual sketch.
 
 ===============================================================================================================
 Release under the GNU General Public License v3
 [https://www.gnu.org/licenses/gpl-3.0.en.html]
 ===============================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+                                          UTILITY SKETCH
+                                    NO SERVICABLE PARTS BELOW
+
+
+
+
+
+
+
+
+
+
+
+
 */
 #include <QMC5883LCompass.h>
 
@@ -16,13 +42,18 @@ QMC5883LCompass compass;
 
 int calibrationData[3][2];
 bool changed = false;
+bool done = false;
+int t = 0;
+int c = 0;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   compass.init();
   
-  Serial.println("Slowly move your magnetometer in all directions until the output does not change anymore");
-  Serial.println("Afterwards just copy the most recent output line into your sketch to use calibration data");
+  Serial.println("This will provide calibration settings for your QMC5883L chip. When prompted, move the magnetometer in all directions until the calibration is complete.");
+  Serial.println("Calibration will begin in 5 seconds.");
+  delay(5000);
+  
 }
 
 void loop() {
@@ -65,7 +96,18 @@ void loop() {
     changed = true;
   }
 
-  if(changed) {  
+  if (changed && !done) {
+    Serial.println("CALIBRATING... Keep moving your sensor around.");
+    c = millis();
+  }
+    t = millis();
+  
+  
+  if ( (t - c > 5000) && !done) {
+    done = true;
+    Serial.println("DONE. Copy the line below and paste it into your projects sketch.);");
+    Serial.println();
+      
     Serial.print("compass.setCalibration(");
     Serial.print(calibrationData[0][0]);
     Serial.print(", ");
@@ -79,5 +121,7 @@ void loop() {
     Serial.print(", ");
     Serial.print(calibrationData[2][1]);
     Serial.println(");");
-  }
+    }
+  
+ 
 }
