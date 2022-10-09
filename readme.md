@@ -54,7 +54,7 @@ QMC5883LCompass compass;
 Then in the setup() function add:
 ```
 void setup(){
-  compass.init(); //I2CBus: Takes an I2CBus which was previously defined. Defaults to the "Wire" Library
+  compass.init();
 }
 ```
 to connect the sensor through the default I2C Interface.
