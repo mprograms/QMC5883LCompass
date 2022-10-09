@@ -54,10 +54,19 @@ QMC5883LCompass compass;
 Then in the setup() function add:
 ```
 void setup(){
-  compass.init();
+  compass.init(); //I2CBus: Takes an I2CBus which was previously defined. Defaults to the "Wire" Library
 }
 ```
+to connect the sensor through the default I2C Interface.
 
+If you want to connect the Sensor through a previously defined Interface, for example a TwoWire interface, add:
+```
+void setup(){
+  TwoWire bus = TwoWire(0);
+  bus.begin(sda_pin, scl_pin, speed); //Initialize the bus with i2c pins and speed (neccesary for ESP8266 and ESP32),
+  compass.init(&bus); //&bus: assign the bus to the sensor.
+}
+```
 
 ### Getting Values
 

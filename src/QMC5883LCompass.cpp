@@ -1,8 +1,8 @@
 /*
 ===============================================================================================================
-QMC5883LCompass.h
+QMC5883L.h
 Library for using QMC5583L series chip boards as a compass.
-Learn more at [https://github.com/mprograms/QMC5883LCompass]
+Learn more at [https://github.com/mprograms/QMC5883L]
 
 Supports:
 
@@ -57,6 +57,7 @@ OVER SAMPLE RATIO (OSR)
 #include <Wire.h>
 
 QMC5883LCompass::QMC5883LCompass() {
+
 }
 
 
@@ -66,8 +67,9 @@ QMC5883LCompass::QMC5883LCompass() {
 	
 	@since v0.1;
 **/
-void QMC5883LCompass::init(){
-	Wire.begin();
+void QMC5883LCompass::init(TwoWire *bus){
+	_int_bus = bus;
+	_int_bus->begin();
 	_writeReg(0x0B,0x01);
 	setMode(0x01,0x0C,0x10,0X00);
 }
@@ -95,10 +97,10 @@ void QMC5883LCompass::setADDR(byte b){
 **/
 // Write register values to chip
 void QMC5883LCompass::_writeReg(byte r, byte v){
-	Wire.beginTransmission(_ADDR);
-	Wire.write(r);
-	Wire.write(v);
-	Wire.endTransmission();
+	_int_bus->beginTransmission(_ADDR);
+	_int_bus->write(r);
+	_int_bus->write(v);
+	_int_bus->endTransmission();
 }
 
 
@@ -160,14 +162,14 @@ void QMC5883LCompass::setCalibration(int x_min, int x_max, int y_min, int y_max,
 	@since v0.1;
 **/
 void QMC5883LCompass::read(){
-	Wire.beginTransmission(_ADDR);
-	Wire.write(0x00);
-	int err = Wire.endTransmission();
+	_int_bus->beginTransmission(_ADDR);
+	_int_bus->write(0x00);
+	int err = _int_bus->endTransmission();
 	if (!err) {
-		Wire.requestFrom(_ADDR, (byte)6);
-		_vRaw[0] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
-		_vRaw[1] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
-		_vRaw[2] = (int)(int16_t)(Wire.read() | Wire.read() << 8);
+		_int_bus->requestFrom(_ADDR, (byte)6);
+		_vRaw[0] = (int)(int16_t)(_int_bus->read() | _int_bus->read() << 8);
+		_vRaw[1] = (int)(int16_t)(_int_bus->read() | _int_bus->read() << 8);
+		_vRaw[2] = (int)(int16_t)(_int_bus->read() | _int_bus->read() << 8);
 
 		if ( _calibrationUse ) {
 			_applyCalibration();
