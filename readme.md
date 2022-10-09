@@ -62,8 +62,8 @@ to connect the sensor through the default I2C Interface.
 If you want to connect the Sensor through a previously defined Interface, for example a TwoWire interface, add:
 ```
 void setup(){
-  TwoWire bus = TwoWire(0);
-  bus.begin(sda_pin, scl_pin, speed); //Initialize the bus with i2c pins and speed (neccesary for ESP8266 and ESP32),
+  TwoWire bus = TwoWire(0); //Initialize a TwoWire-Bus called "bus" and assign it to bus 0.
+  bus.begin(sda_pin, scl_pin, speed); //Initialize the bus with i2c pins and speed (neccesary for ESP8266 and ESP32).
   compass.init(&bus); //&bus: assign the bus to the sensor.
 }
 ```
