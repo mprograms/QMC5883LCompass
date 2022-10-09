@@ -1,6 +1,6 @@
 /*
 ===============================================================================================================
-QMC5883L.h
+QMC5883LCompass.h
 Library for using QMC5583L series chip boards as a compass.
 Learn more at [https://github.com/mprograms/QMC5883L]
 
