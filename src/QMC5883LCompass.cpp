@@ -64,7 +64,11 @@ QMC5883LCompass::QMC5883LCompass() {
 /**
 	INIT
 	Initialize Chip - This needs to be called in the sketch setup() function.
-	
+
+	Optional:
+	A predefined TwoWire bus can be assigned using "init(&YourPredefinedBus);": 
+	Example: 
+		compass.init(&I2C_1);
 	@since v0.1;
 **/
 void QMC5883LCompass::init(TwoWire *bus){
