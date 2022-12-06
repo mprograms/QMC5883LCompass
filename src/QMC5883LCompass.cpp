@@ -115,6 +115,21 @@ void QMC5883LCompass::setMode(byte mode, byte odr, byte rng, byte osr){
 
 
 /**
+ * Define the magnetic declination for accurate degrees.
+ * https://www.magnetic-declination.com/
+ * 
+ * @example
+ * For: Londrina, PR, Brazil at date 2022-12-05
+ * The magnetic declination is: -19º 43'
+ * 
+ * then: setMagneticDeclination(-19, 43);
+ */
+void QMC5883LCompass::setMagneticDeclination(int degrees, uint8_t minutes) {
+	_magneticDeclinationDegrees = degrees + minutes / 60;
+}
+
+
+/**
 	RESET
 	Reset the chip.
 	
@@ -324,13 +339,15 @@ int QMC5883LCompass::_get(int i){
 /**
 	GET AZIMUTH
 	Calculate the azimuth (in degrees);
+	Correct the value with magnetic declination if defined. 
 	
 	@since v0.1;
 	@return int azimuth
 **/
 int QMC5883LCompass::getAzimuth(){
-	int a = atan2( getY(), getX() ) * 180.0 / PI;
-	return a < 0 ? 360 + a : a;
+	float heading = atan2( getY(), getX() ) * 180.0 / PI;
+	heading += _magneticDeclinationDegrees;
+	return (int)heading % 360;
 }
 
 

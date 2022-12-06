@@ -12,6 +12,7 @@ class QMC5883LCompass{
 	void init();
     void setADDR(byte b);
     void setMode(byte mode, byte odr, byte rng, byte osr);
+	void setMagneticDeclination(int degrees, uint8_t minutes);
 	void setSmoothing(byte steps, bool adv);
 	void setCalibration(int x_min, int x_max, int y_min, int y_max, int z_min, int z_max);
     void setReset();
@@ -26,6 +27,7 @@ class QMC5883LCompass{
   private:
     void _writeReg(byte reg,byte val);
 	int _get(int index);
+	float _magneticDeclinationDegrees = 0;
 	bool _smoothUse = false;
 	byte _smoothSteps = 5;
 	bool _smoothAdvanced = false;
