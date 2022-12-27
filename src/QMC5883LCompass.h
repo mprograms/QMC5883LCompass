@@ -13,8 +13,14 @@ class QMC5883LCompass{
     void setADDR(byte b);
     void setMode(byte mode, byte odr, byte rng, byte osr);
 	void setSmoothing(byte steps, bool adv);
+	void calibrate();
 	void setCalibration(int x_min, int x_max, int y_min, int y_max, int z_min, int z_max);
-    void setReset();
+	void setCalibrationOffsets(float x_offset, float y_offset, float z_offset);
+	void setCalibrationScales(float x_scale, float y_scale, float z_scale);
+    float getCalibrationOffset(uint8_t index);
+	float getCalibrationScale(uint8_t index);
+	void clearCalibration();
+	void setReset();
     void read();
 	int getX();
 	int getY();
@@ -22,7 +28,7 @@ class QMC5883LCompass{
 	int getAzimuth();
 	byte getBearing(int azimuth);
 	void getDirection(char* myArray, int azimuth);
-	
+
   private:
     void _writeReg(byte reg,byte val);
 	int _get(int index);
@@ -36,8 +42,8 @@ class QMC5883LCompass{
 	long _vTotals[3] = {0,0,0};
 	int _vSmooth[3] = {0,0,0};
 	void _smoothing();
-	bool _calibrationUse = false;
-	int _vCalibration[3][2];
+	float _offset[3] = {0.,0.,0.};
+	float _scale[3] = {1.,1.,1.};
 	int _vCalibrated[3];
 	void _applyCalibration();
 	const char _bearings[16][3] =  {
