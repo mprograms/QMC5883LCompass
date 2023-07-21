@@ -40,7 +40,7 @@ Release under the GNU General Public License v3
 
 QMC5883LCompass compass;
 
-int calibrationData[3][2];
+int calibrationData[3][2] = {{65000, -65000}, {65000, -65000}, {65000, -65000}};
 bool changed = false;
 bool done = false;
 int t = 0;
