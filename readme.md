@@ -286,3 +286,5 @@ It is recommended that you use the provided calibration sketch to generate your 
 Special thanks is given to the following individuals who have contributed to this library:
 
 	- Claus Näveke : [TheNitek](https://github.com/TheNitek) for adding calibration functions to the library.
+ 	- Paulo C. B. Sincos : [paulosincos](https://github.com/paulosincos)https://github.com/paulosincos) for enhancements to the calibration script.
+  	- ATsaruk : [ATsaruk](https://github.com/ATsaruk) for enhancements to the calibration script.
