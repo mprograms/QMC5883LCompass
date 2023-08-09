@@ -419,14 +419,16 @@ int QMC5883LCompass::getAzimuth(){
 	GET BEARING
 	Divide the 360 degree circle into 16 equal parts and then return the a value of 0-15
 	based on where the azimuth is currently pointing.
-	
+
+ 
+	@since v1.2.1 - function takes into account negative azimuth values. Credit: https://github.com/prospark
 	@since v1.0.1 - function now requires azimuth parameter.
 	@since v0.2.0 - initial creation
 	
 	@return byte direction of bearing
 */
 byte QMC5883LCompass::getBearing(int azimuth){
-	unsigned long a = azimuth / 22.5;
+	unsigned long a = ( azimuth > -0.5 ) ? azimuth / 22.5 : (azimuth+360)/22.5;
 	unsigned long r = a - (int)a;
 	byte sexdec = 0;	
 	sexdec = ( r >= .5 ) ? ceil(a) : floor(a);
