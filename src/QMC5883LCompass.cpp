@@ -16,7 +16,7 @@ Supports:
 ===============================================================================================================
 
 v1.0 - June 13, 2019
-Written by MRPrograms 
+Written by MPrograms 
 Github: [https://github.com/mprograms/]
 
 Release under the GNU General Public License v3
