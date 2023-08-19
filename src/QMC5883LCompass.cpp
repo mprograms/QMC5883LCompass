@@ -16,7 +16,7 @@ Supports:
 ===============================================================================================================
 
 v1.0 - June 13, 2019
-Written by MRPrograms 
+Written by MPrograms 
 Github: [https://github.com/mprograms/]
 
 Release under the GNU General Public License v3
@@ -149,10 +149,10 @@ void QMC5883LCompass::setSmoothing(byte steps, bool adv){
 
 void QMC5883LCompass::calibrate() {
 	clearCalibration();
-	int calibrationData[3][2] = {{65000, -65000}, {65000, -65000}, {65000, -65000}};
-  	int	x = calibrationData[0][0] = calibrationData[0][1] = getX();
-  	int	y = calibrationData[1][0] = calibrationData[1][1] = getY();
-  	int	z = calibrationData[2][0] = calibrationData[2][1] = getZ();
+	long calibrationData[3][2] = {{65000, -65000}, {65000, -65000}, {65000, -65000}};
+  	long	x = calibrationData[0][0] = calibrationData[0][1] = getX();
+  	long	y = calibrationData[1][0] = calibrationData[1][1] = getY();
+  	long	z = calibrationData[2][0] = calibrationData[2][1] = getZ();
 
 	unsigned long startTime = millis();
 
