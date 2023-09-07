@@ -8,12 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Issue #27. Library version number was not updated.
  
-## [v1.2.2]
+## [v1.2.2] - 2023-09-07 [YANKED]
 ### Fixed
 - Issue #25. A previous change to the calibrate() set values out of range from int variable type. Changed to long.
 - Typo in author credit of QMC5883LCompass.cpp.
 
-## [v1.2.1]
+## [v1.2.1] - 2023-09-07 [YANKED]
 ### Fixed
 - Bug in getBearing function where negative values would cause incorrect bearings.
 
